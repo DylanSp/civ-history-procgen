@@ -38,6 +38,18 @@ namespace Terrain
                 }
             }
 
+            // clean up unconnected rivers
+            for (var row = 0; row < sideLength; row++)
+            {
+                for (var col = 0; col < sideLength; col++)
+                {
+                    if (grid[row, col] is River river && !TileLeadsToOcean(grid, row, col))
+                    {
+                        grid[row, col] = river.UnderlyingTerrain;
+                    }
+                }
+            }
+
             // spawn rivers
             for (var row = 0; row < sideLength; row++)
             {
@@ -56,7 +68,7 @@ namespace Terrain
 
         private void SpawnAdjacentRiver(TerrainType[,] grid, int row, int col)
         {
-            if (!GetAdjacentTiles(grid, row, col).Any(adjacent => adjacent.tile.Height < grid[row, col].Height))
+            if (!GetAdjacentTiles(grid, row, col).Any(adjacent => adjacent.tile.Height < grid[row, col].Height && TileLeadsToOcean(grid, adjacent.adjacentRow, adjacent.adjacentCol)))
             {
                 return;
             }
@@ -66,10 +78,9 @@ namespace Terrain
             {
                 randomAdjacentRow = Math.Clamp(0, row + _rng.Next(-1, 2), grid.GetLength(0) - 1);
                 randomAdjacentCol = Math.Clamp(0, col + _rng.Next(-1, 2), grid.GetLength(1) - 1);
-            } while (randomAdjacentRow == row && randomAdjacentCol == col && grid[randomAdjacentRow, randomAdjacentCol].Height >= grid[row, col].Height);
+            } while ((randomAdjacentRow == row && randomAdjacentCol == col) || grid[randomAdjacentRow, randomAdjacentCol].Height >= grid[row, col].Height || !TileLeadsToOcean(grid, randomAdjacentRow, randomAdjacentCol));
 
-            if (TileLeadsToOcean(grid, randomAdjacentRow, randomAdjacentCol)
-                && !(grid[randomAdjacentRow, randomAdjacentCol] is Ocean))
+            if (!(grid[randomAdjacentRow, randomAdjacentCol] is Ocean))
             {
                 var previous = grid[randomAdjacentRow, randomAdjacentCol];
                 grid[randomAdjacentRow, randomAdjacentCol] = new River
@@ -92,16 +103,30 @@ namespace Terrain
             var height = _heightGenerator.GetRandomHeight(distanceFromCenter);
 
             var OCEAN_MAX_HEIGHT = 0.2; // arbitrary
-            if (height <= OCEAN_MAX_HEIGHT && distanceFromCenter >= oceanDistanceThreshold)
+            if (height <= OCEAN_MAX_HEIGHT)
             {
-                return new Ocean
+                if (distanceFromCenter >= oceanDistanceThreshold)
                 {
-                    Height = OCEAN_MAX_HEIGHT,
-                };
+                    return new Ocean
+                    {
+                        Height = OCEAN_MAX_HEIGHT,
+                    };
+                }
+                else
+                {
+                    return new River
+                    {
+                        Height = height,
+                        UnderlyingTerrain = new Plains
+                        {
+                            Height = height,
+                        },
+                    };
+                }
             }
 
             // arbitrary
-            if (height <= 0.4)
+            if (height <= 0.5)
             {
                 return new Plains
                 {

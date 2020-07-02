@@ -26,7 +26,7 @@ namespace CivilizationHistoryProcGen
                     switch (grid[row, col])
                     {
                         case Ocean _:
-                            Console.BackgroundColor = ConsoleColor.Blue;
+                            Console.BackgroundColor = ConsoleColor.DarkBlue;
                             Console.Write(" ");
                             Console.ResetColor();
                             break;
@@ -40,7 +40,7 @@ namespace CivilizationHistoryProcGen
                             Console.Write("M");
                             break;
                         case River r:
-                            Console.ForegroundColor = ConsoleColor.Blue;
+                            Console.BackgroundColor = ConsoleColor.Cyan;
                             switch (r.UnderlyingTerrain)
                             {
                                 case Plains _:
