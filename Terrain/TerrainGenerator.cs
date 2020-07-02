@@ -57,7 +57,7 @@ namespace Terrain
             }
 
             // arbitrary
-            if (height <= 0.5)
+            if (height <= 0.4)
             {
                 return new Plains
                 {
@@ -66,7 +66,7 @@ namespace Terrain
             }
 
             // arbitrary
-            if (height <= 0.8)
+            if (height <= 0.7)
             {
                 return new Hills
                 {
