@@ -20,7 +20,7 @@ namespace Terrain
         /// <returns></returns>
         public double GetRandomHeight(double distanceFromCenter)
         {
-            if (distanceFromCenter < 0 || distanceFromCenter >= 1)
+            if (distanceFromCenter < 0 || distanceFromCenter > 1)
             {
                 throw new ArgumentOutOfRangeException(nameof(distanceFromCenter));
             }

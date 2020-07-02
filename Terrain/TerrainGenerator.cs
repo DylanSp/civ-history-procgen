@@ -17,7 +17,7 @@ namespace Terrain
             var sideLength = gridRadius * 2 + 1;
             var grid = new TerrainType[sideLength, sideLength];
 
-            var maxDistance = Math.Sqrt(2) * sideLength;
+            var maxDistance = Math.Sqrt(2) * gridRadius;
 
             for (var row = 0; row < sideLength; row++)
             {
@@ -28,7 +28,7 @@ namespace Terrain
                     var distanceScaled = distanceFromCenter / maxDistance;
 
                     // arbitrary
-                    var oceanDistanceThreshold = 0.8;
+                    var oceanDistanceThreshold = 0.6;
 
                     grid[row, col] = GenerateTerrainTile(distanceScaled, oceanDistanceThreshold);
                 }
