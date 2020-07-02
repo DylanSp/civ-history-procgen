@@ -25,17 +25,19 @@ namespace CivilizationHistoryProcGen
                 {
                     switch (grid[row, col])
                     {
-                        case Ocean _: 
-                            Console.Write("o");
+                        case Ocean _:
+                            Console.BackgroundColor = ConsoleColor.Blue;
+                            Console.Write(" ");
+                            Console.ResetColor();
                             break;
                         case Plains _:
                             Console.Write("_");
                             break;
                         case Hills _:
-                            Console.Write("H");
+                            Console.Write("^");
                             break;
                         case Mountains _:
-                            Console.Write("^");
+                            Console.Write("M");
                             break;
                     }
                 }
