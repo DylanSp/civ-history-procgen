@@ -24,7 +24,7 @@ namespace Terrain
                 for (var col = 0; col < sideLength; col++)
                 {
                     var distanceFromCenter =
-                        Math.Sqrt(Math.Pow(Math.Abs(row - gridRadius), 2) + Math.Pow(Math.Abs(col = gridRadius), 2));
+                        Math.Sqrt(Math.Pow(Math.Abs(row - gridRadius), 2) + Math.Pow(Math.Abs(col - gridRadius), 2));
                     var distanceScaled = distanceFromCenter / maxDistance;
 
                     // arbitrary
