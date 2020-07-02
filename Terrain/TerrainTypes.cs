@@ -27,5 +27,6 @@ namespace Terrain
 
     public class River : TerrainType
     {
+        public TerrainType UnderlyingTerrain { get; set; }
     }
 }

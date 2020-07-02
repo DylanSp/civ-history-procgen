@@ -39,6 +39,22 @@ namespace CivilizationHistoryProcGen
                         case Mountains _:
                             Console.Write("M");
                             break;
+                        case River r:
+                            Console.ForegroundColor = ConsoleColor.Blue;
+                            switch (r.UnderlyingTerrain)
+                            {
+                                case Plains _:
+                                    Console.Write("_");
+                                    break;
+                                case Hills _:
+                                    Console.Write("^");
+                                    break;
+                                case Mountains _:
+                                    Console.Write("M");
+                                    break;
+                            }
+                            Console.ResetColor();
+                            break;
                     }
                 }
                 Console.WriteLine();

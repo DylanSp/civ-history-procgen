@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Terrain
 {
     public class TerrainGenerator
     {
         private readonly HeightGenerator _heightGenerator;
+        private readonly Random _rng;
 
         public TerrainGenerator()
         {
-            var rng = new Random();
-            _heightGenerator = new HeightGenerator(rng);
+            _rng = new Random();
+            _heightGenerator = new HeightGenerator(_rng);
         }
 
         public TerrainType[,] GenerateGrid(int gridRadius)
@@ -19,6 +22,7 @@ namespace Terrain
 
             var maxDistance = Math.Sqrt(2) * gridRadius;
 
+            // generate initial map
             for (var row = 0; row < sideLength; row++)
             {
                 for (var col = 0; col < sideLength; col++)
@@ -34,7 +38,47 @@ namespace Terrain
                 }
             }
 
+            // spawn rivers
+            for (var row = 0; row < sideLength; row++)
+            {
+                for (var col = 0; col < sideLength; col++)
+                {
+                    var tile = grid[row, col];
+                    if ((tile is Mountains || tile is Hills))
+                    {
+                        SpawnAdjacentRiver(grid, row, col);
+                    }
+                }
+            }
+
             return grid;
+        }
+
+        private void SpawnAdjacentRiver(TerrainType[,] grid, int row, int col)
+        {
+            if (!GetAdjacentTiles(grid, row, col).Any(adjacent => adjacent.tile.Height < grid[row, col].Height))
+            {
+                return;
+            }
+
+            int randomAdjacentRow, randomAdjacentCol;
+            do
+            {
+                randomAdjacentRow = Math.Clamp(0, row + _rng.Next(-1, 2), grid.GetLength(0) - 1);
+                randomAdjacentCol = Math.Clamp(0, col + _rng.Next(-1, 2), grid.GetLength(1) - 1);
+            } while (randomAdjacentRow == row && randomAdjacentCol == col && grid[randomAdjacentRow, randomAdjacentCol].Height >= grid[row, col].Height);
+
+            if (TileLeadsToOcean(grid, randomAdjacentRow, randomAdjacentCol)
+                && !(grid[randomAdjacentRow, randomAdjacentCol] is Ocean))
+            {
+                var previous = grid[randomAdjacentRow, randomAdjacentCol];
+                grid[randomAdjacentRow, randomAdjacentCol] = new River
+                {
+                    Height = previous.Height,
+                    UnderlyingTerrain = previous,
+                };
+                SpawnAdjacentRiver(grid, randomAdjacentRow, randomAdjacentCol);
+            }
         }
 
         /// <summary>
@@ -78,6 +122,39 @@ namespace Terrain
             {
                 Height = height,
             };
+        }
+
+        private bool TileLeadsToOcean(TerrainType[,] grid, int row, int col)
+        {
+            var tile = grid[row, col];
+            if (tile is Ocean)
+            {
+                return true;
+            }
+
+            var adjacentTiles = GetAdjacentTiles(grid, row, col);
+
+            return adjacentTiles.Any(adjacent => adjacent.tile.Height < tile.Height && TileLeadsToOcean(grid, adjacent.adjacentRow, adjacent.adjacentCol));
+        }
+
+        private List<(TerrainType tile, int adjacentRow, int adjacentCol)> GetAdjacentTiles(TerrainType[,] grid, int row, int col)
+        {
+            var adjacentTiles = new List<(TerrainType tile, int adjacentRow, int adjacentCol)>();
+            var offsets = from rowOffset in Enumerable.Range(-1, 3)
+                          from colOffset in Enumerable.Range(-1, 3)
+                          select (rowOffset, colOffset);
+            foreach (var (rowOffset, colOffset) in offsets)
+            {
+                var adjacentRow = row + rowOffset;
+                var adjacentCol = col + colOffset;
+                if (adjacentRow < 0 || adjacentRow >= grid.GetLength(0) || adjacentCol < 0 || adjacentCol >= grid.GetLength(0))
+                {
+                    continue;
+                }
+                adjacentTiles.Add((grid[adjacentRow, adjacentCol], adjacentRow, adjacentCol));
+            }
+
+            return adjacentTiles;
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Terrain
 {
@@ -26,7 +24,7 @@ namespace Terrain
             }
 
             var rawHeight = _rng.NextDouble();
-            var scaledByDistanceHeight = rawHeight * (1 - distanceFromCenter);
+            var scaledByDistanceHeight = rawHeight * (1 - distanceFromCenter)/* * (1 - distanceFromCenter)*/;
             return scaledByDistanceHeight;
         }
     }
