@@ -16,7 +16,7 @@ namespace CivilizationHistoryProcGen
         private static void DisplayGrid()
         {
             var terrainGenerator = new TerrainGenerator();
-            var gridLength = 10;
+            var gridLength = 20;
             var grid = terrainGenerator.GenerateGrid(gridLength);
 
             for (var row = 0; row < grid.GetLength(0); row++)
@@ -29,7 +29,7 @@ namespace CivilizationHistoryProcGen
                             Console.Write("o");
                             break;
                         case Plains _:
-                            Console.Write("p");
+                            Console.Write("_");
                             break;
                         case Hills _:
                             Console.Write("H");
