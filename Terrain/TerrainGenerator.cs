@@ -6,6 +6,8 @@ namespace Terrain
 {
     public class TerrainGenerator
     {
+        public readonly static double OceanMaxHeight = 0.2;
+
         private readonly HeightGenerator _heightGenerator;
         private readonly Random _rng;
 
@@ -15,10 +17,10 @@ namespace Terrain
             _heightGenerator = new HeightGenerator(_rng);
         }
 
-        public TerrainType[,] GenerateGrid(int gridRadius)
+        public (bool, double)[,] GenerateGrid(int gridRadius)
         {
             var sideLength = gridRadius * 2 + 1;
-            var grid = new TerrainType[sideLength, sideLength];
+            var grid = new (bool, double)[sideLength, sideLength];
 
             var maxDistance = Math.Sqrt(2) * gridRadius;
 
@@ -34,31 +36,15 @@ namespace Terrain
                     // arbitrary
                     var oceanDistanceThreshold = 0.6;
 
-                    grid[row, col] = GenerateTerrainTile(distanceScaled, oceanDistanceThreshold);
-                }
-            }
+                    var height = _heightGenerator.GetRandomHeight(distanceScaled);
 
-            // clean up unconnected rivers
-            for (var row = 0; row < sideLength; row++)
-            {
-                for (var col = 0; col < sideLength; col++)
-                {
-                    if (grid[row, col] is River river && !TileLeadsToOcean(grid, row, col))
+                    if (height <= OceanMaxHeight && distanceScaled >= oceanDistanceThreshold)
                     {
-                        grid[row, col] = river.UnderlyingTerrain;
+                        grid[row, col] = (true, OceanMaxHeight);
                     }
-                }
-            }
-
-            // spawn rivers
-            for (var row = 0; row < sideLength; row++)
-            {
-                for (var col = 0; col < sideLength; col++)
-                {
-                    var tile = grid[row, col];
-                    if ((tile is Mountains || tile is Hills))
+                    else
                     {
-                        SpawnAdjacentRiver(grid, row, col);
+                        grid[row, col] = (false, height);
                     }
                 }
             }

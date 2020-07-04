@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Drawing;
+using System.IO;
 using Terrain;
 
 namespace CivilizationHistoryProcGen
@@ -7,60 +9,44 @@ namespace CivilizationHistoryProcGen
     {
         static void Main(string[] args)
         {
-            DisplayGrid();
+            using (var bitmap = CreateHeightBitmap())
+            {
+                var filename = "heightMap.bmp";
+                if (File.Exists(filename))
+                {
+                    File.Delete(filename);
+                }
+                bitmap.Save(filename);
+            }
 
             Console.WriteLine("Press Enter to exit");
             Console.ReadLine();
         }
 
-        private static void DisplayGrid()
+        private static Bitmap CreateHeightBitmap()
         {
             var terrainGenerator = new TerrainGenerator();
-            var gridLength = 20;
-            var grid = terrainGenerator.GenerateGrid(gridLength);
+            var gridRadius = 500;
+            var grid = terrainGenerator.GenerateGrid(gridRadius);
 
+            var bitmap = new Bitmap(grid.GetLength(0), grid.GetLength(1));
             for (var row = 0; row < grid.GetLength(0); row++)
             {
                 for (var col = 0; col < grid.GetLength(1); col++)
                 {
-                    switch (grid[row, col])
+                    if (grid[row, col].Item1)
                     {
-                        case Ocean _:
-                            Console.BackgroundColor = ConsoleColor.DarkBlue;
-                            Console.Write(" ");
-                            Console.ResetColor();
-                            break;
-                        case Plains _:
-                            Console.Write("_");
-                            break;
-                        case Hills _:
-                            Console.Write("^");
-                            break;
-                        case Mountains _:
-                            Console.Write("M");
-                            break;
-                        case River r:
-                            Console.BackgroundColor = ConsoleColor.Cyan;
-                            switch (r.UnderlyingTerrain)
-                            {
-                                case Plains _:
-                                    Console.Write("_");
-                                    break;
-                                case Hills _:
-                                    Console.Write("^");
-                                    break;
-                                case Mountains _:
-                                    Console.Write("M");
-                                    break;
-                            }
-                            Console.ResetColor();
-                            break;
+                        bitmap.SetPixel(row, col, Color.Blue);
+                    }
+                    else
+                    {
+                        var grayscaledHeight = (int) Math.Floor(grid[row, col].Item2 * 255);
+                        var color = Color.FromArgb(grayscaledHeight, grayscaledHeight, grayscaledHeight);
+                        bitmap.SetPixel(row, col, color);
                     }
                 }
-                Console.WriteLine();
             }
-             
-            Console.WriteLine();
+            return bitmap;
         }
     }
 }
